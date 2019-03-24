@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CutPictureFrom", "CutPictureFrom\CutPictureFrom.csproj", "{4A56DB1D-A740-4D6A-ABA4-B82EFA368663}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CutPicture", "CutPictureFrom\CutPicture.csproj", "{4A56DB1D-A740-4D6A-ABA4-B82EFA368663}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
