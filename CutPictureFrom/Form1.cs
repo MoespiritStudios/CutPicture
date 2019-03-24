@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -37,84 +38,67 @@ namespace CutPictureFrom
         }
         public class Temp
         {
-            public Bitmap bitmap;
             public int index;
-            public int i;
-            public int j;
+            public int x;
+            public int y;
+            public int width;
+            public int height;
             public int amount;
-            public Temp(Bitmap bitmap,int index,int i,int j,int amount)
+            public Temp(int index, int x, int y, int width, int height, int amount)
             {
-                this.bitmap = bitmap;
                 this.index = index;
-                this.i = i;
-                this.j = j;
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
                 this.amount = amount;
             }
         }
         public static void ThreadMethod1(object obj)
         {
-            FileStream fs = new FileStream(name, FileMode.Open, FileAccess.Read);
-            Image image = Image.FromStream(fs);
-            fs.Close();
-            fs.Dispose();
 
-            Bitmap bitmap = new Bitmap(image);
             Temp t = obj as Temp;
-
-            image.Dispose();
-            fs.Close();
-            fs.Dispose();
-
-            int index = t.index;
-            int i = t.i;
-            int j = t.j;
-            int amount = t.amount;
-            Bitmap temp = new Bitmap(bitmap.Width / amount, bitmap.Height / amount);
-            int t1 = 0;
-            int t2 = 0;
-            for (int x = j * (bitmap.Width / amount); x < j * (bitmap.Width / amount) + bitmap.Width / amount; x++)
-            {
-                t2 = 0;
-                for (int y = i * (bitmap.Height / amount); y < i * (bitmap.Height / amount) + bitmap.Height / amount; y++)
-                {
-                    temp.SetPixel(t1, t2, bitmap.GetPixel(x, y));
-                    t2++;
-                }
-                t1++;
-            }
-
-            temp.Save(path + "\\" + amount + "X" + amount + "\\" + (index + 1) + ".png", ImageFormat.Png);
-            temp.Dispose();
-            bitmap.Dispose();
+            Mat temp = new Mat(name);
+            Mat text = new Mat(temp, new Rect(t.x, t.y, t.width, t.height));
+            temp.Release();
+            string pathT = path + "\\" + t.amount + "X" + t.amount + "\\" + t.index + ".png";
+            text.SaveImage(pathT);
+            text.Release();
 
             finish++;
         }
-
         private void button3_Click(object sender, EventArgs e)
         {
             finish = 0;
             name = FileName.Text;
+            Bitmap image = new Bitmap(Image.FromFile(name));
             timer1.Start();
-            progressBar1.Maximum = 4 * 4 + 5 * 5 + 6 * 6;//决定最大切割网格
+            progressBar1.Maximum = 4 * 4 + 5 * 5 + 6 * 6;
             progressBar1.Value = 0;
-            for (int amount = 4; amount <= 6; amount++)//修改也记得改这里
+            int width = image.Width;
+            int height = image.Height;
+            image.Dispose();
+            // MessageBox.Show(ThreadPool.SetMaxThreads(8, 8).ToString());
+            for (int amount = 4; amount <= 6; amount++)
             {
-                int index = 0;
+                int index = 1;
                 Directory.CreateDirectory(SaveFold.Text + "\\" + amount + "X" + amount);
                 for (int i = 0; i < amount; i++)
                 {
+
+                    //ThreadPool.UnsafeQueueUserWorkItem(new WaitCallback(ThreadMethod3), new Temp(index, 0, i * (height / amount), (width / amount), (height / amount), amount));
+                    //index += 4;
                     for (int j = 0; j < amount; j++)
                     {
-                        try
-                        {
-                            ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadMethod1), new Temp(null, index, i, j, amount));
-                            index++;
-
-                        }
-                        catch (Exception ex)
-                        {
-                            j--;
-                        }
+                        //Mat temp = new Mat(name);
+                        //Mat text = new Mat(temp, new Rect(j * (width / amount), i * (height / amount), (width / amount), (height / amount)));
+                        //temp.Dispose();
+                        //string pathT = path + "\\" + amount + "X" + amount + "\\" + index + ".png";
+                        // text.SaveImage(pathT);
+                        //text.Dispose();
+                        ThreadPool.UnsafeQueueUserWorkItem(new WaitCallback(ThreadMethod1), new Temp(index, j * (width / amount), i * (height / amount), (width / amount), (height / amount), amount));
+                        //progressBar1.Value++;
+                        index++;
                     }
                 }
             }
